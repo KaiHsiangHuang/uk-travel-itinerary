@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英国旅行行程 - 9月14-21日</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .map-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .map-header {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .map-header h3 {
+            margin: 0;
+            font-size: 1.3em;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+
+        .timeline {
+            padding: 40px;
+        }
+
+        .day-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 6px solid;
+        }
+
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .day-card.london { border-left-color: #e74c3c; }
+        .day-card.cambridge { border-left-color: #3498db; }
+        .day-card.york { border-left-color: #f39c12; }
+        .day-card.cotswolds { border-left-color: #27ae60; }
+
+        .day-header {
+            padding: 20px 30px;
+            background: linear-gradient(90deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .day-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .day-location {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .day-content {
+            padding: 30px;
+        }
+
+        .activity {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .activity:hover {
+            background-color: #f8f9fa;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .transport { background-color: #3498db; color: white; }
+        .accommodation { background-color: #e74c3c; color: white; }
+        .sightseeing { background-color: #f39c12; color: white; }
+        .food { background-color: #27ae60; color: white; }
+        .museum { background-color: #9b59b6; color: white; }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-time {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .activity-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+
+        .activity-details {
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        .route-map {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .route-map h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .route {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .route-point {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+        }
+
+        .route-arrow {
+            font-size: 1.5em;
+        }
+
+        .tips {
+            background: #f8f9fa;
+            border-left: 4px solid #17a2b8;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .tips h4 {
+            color: #17a2b8;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .booking-card {
+            background: linear-gradient(135deg, #a8e6cf 0%, #88d8c0 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #27ae60;
+        }
+
+        .booking-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .booking-details {
+            color: #34495e;
+            line-height: 1.4;
+        }
+
+        .booking-details strong {
+            color: #27ae60;
+        }
+
+        .airbnb-card {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+            border-left-color: #e74c3c;
+        }
+
+        .hotel-card {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            border-left-color: #1abc9c;
+        }
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .timeline {
+                padding: 20px;
+            }
+            
+            .activity {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .activity-icon {
+                margin: 0 auto 15px auto;
+            }
+            
+            .route {
+                flex-direction: column;
+            }
+
+            #map {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇬🇧 英国之旅</h1>
+            <p>9月14-21日 • 伦敦 → 剑桥 → 约克 → 科茨沃尔德</p>
+        </div>
+
+        <div class="map-container">
+            <div class="map-header">
+                <h3>🗺️ 旅行路线图</h3>
+            </div>
+            <div id="map"></div>
+        </div>
+
+        <div class="route-map">
+            <h3>🗺️ 您的旅行路线</h3>
+            <div class="route">
+                <div class="route-point">伦敦</div>
+                <div class="route-arrow">→</div>
+                <div class="route-point">剑桥</div>
+                <div class="route-arrow">→</div>
+                <div class="route-point">约克</div>
+                <div class="route-arrow">→</div>
+                <div class="route-point">科茨沃尔德</div>
+                <div class="route-arrow">→</div>
+                <div class="route-point">伦敦</div>
+            </div>
+        </div>
+
+        <div class="timeline">
+            <!-- 第1天 -->
+            <div class="day-card london">
+                <div class="day-header">
+                    <div class="day-title">第1天 - 9月14日 (星期六)</div>
+                    <div class="day-location">📍 抵达伦敦</div>
+                </div>
+                <div class="day-content">
+                    <div class="activity">
+                        <div class="activity-icon transport">✈️</div>
+                        <div class="activity-content">
+                            <div class="activity-time">14:25</div>
+                            <div class="activity-title">抵达希思罗机场 (LHR)</div>
+                            <div class="activity-details">航班降落时间 - 提取行李并前往交通工具</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon transport">🚗</div>
+                        <div class="activity-content">
+                            <div class="activity-time">15:30</div>
+                            <div class="activity-title">出租车到住宿地</div>
+                            <div class="activity-details">私人租车到南肯辛顿/帕丁顿/布鲁姆斯伯里地区</div>
+                        </div>
+                    </div>
+                    <div class="booking-card airbnb-card">
+                        <div class="booking-title">🏠 伦敦住宿 - Airbnb预订</div>
+                        <div class="booking-details">
+                            <strong>链接:</strong> www.airbnb.com/NJJj4Eaj<br/>
+                            <strong>类型:</strong> 3卧室公寓<br/>
+                            <strong>区域:</strong> 南肯辛顿/帕丁顿/布鲁姆斯伯里<br/>
+                            <strong>特色:</strong> 安静住宅区，地铁交通便利<br/>
+                            <strong>入住:</strong> 9月14-17日 (3晚)
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon accommodation">🏠</div>
+                        <div class="activity-content">
+                            <div class="activity-time">16:30</div>
+                            <div class="activity-title">入住和休息</div>
+                            <div class="activity-details">安静住宅区的3卧室Airbnb，地铁交通便利</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">🌳</div>
+                        <div class="activity-content">
+                            <div class="activity-time">傍晚</div>
+                            <div class="activity-title">公园悠闲漫步</div>
+                            <div class="activity-details">海德公园或肯辛顿花园 - 温和的倒时差恢复</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon food">🍽️</div>
+                        <div class="activity-content">
+                            <div class="activity-time">19:00</div>
+                            <div class="activity-title">当地轻松晚餐</div>
+                            <div class="activity-details">附近餐厅或酒吧，享受轻松的第一餐</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第2天 -->
+            <div class="day-card london">
+                <div class="day-header">
+                    <div class="day-title">第2天 - 9月15日 (星期日)</div>
+                    <div class="day-location">📍 伦敦市中心观光</div>
+                </div>
+                <div class="day-content">
+                    <div class="activity">
+                        <div class="activity-icon food">☕</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">悠闲早餐/早午餐</div>
+                            <div class="activity-details">住宿附近的当地咖啡馆</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">👑</div>
+                        <div class="activity-content">
+                            <div class="activity-time">中午</div>
+                            <div class="activity-title">白金汉宫和圣詹姆斯公园</div>
+                            <div class="activity-details">皇家观光和美丽的公园漫步</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">⛪</div>
+                        <div class="activity-content">
+                            <div class="activity-time">下午</div>
+                            <div class="activity-title">威斯敏斯特大教堂和大本钟</div>
+                            <div class="activity-details">伦敦标志性地标和历史遗迹</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon transport">🚢</div>
+                        <div class="activity-content">
+                            <div class="activity-time">15:00</div>
+                            <div class="activity-title">泰晤士河游船</div>
+                            <div class="activity-details">威斯敏斯特码头到塔桥 - 河景风光</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon food">🍽️</div>
+                        <div class="activity-content">
+                            <div class="activity-time">傍晚</div>
+                            <div class="activity-title">科文特花园晚餐</div>
+                            <div class="activity-details">充满活力的地区，餐厅选择丰富</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">🎡</div>
+                        <div class="activity-content">
+                            <div class="activity-time">可选</div>
+                            <div class="activity-title">伦敦眼（夜景）</div>
+                            <div class="activity-details">美丽的城市夜景，步行较少</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第3天 -->
+            <div class="day-card cambridge">
+                <div class="day-header">
+                    <div class="day-title">第3天 - 9月16日 (星期一)</div>
+                    <div class="day-location">📍 剑桥一日游</div>
+                </div>
+                <div class="day-content">
+                    <div class="activity">
+                        <div class="activity-icon transport">🚊</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">火车到剑桥</div>
+                            <div class="activity-details">从伦敦国王十字车站出发，约1小时车程</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">🎓</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">剑桥大学游览</div>
+                            <div class="activity-details">参观国王学院礼拜堂和著名学院建筑</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">🚣</div>
+                        <div class="activity-content">
+                            <div class="activity-time">中午</div>
+                            <div class="activity-title">康河撑船</div>
+                            <div class="activity-details">体验经典的剑桥撑船，欣赏大学后花园美景</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon food">🫖</div>
+                        <div class="activity-content">
+                            <div class="activity-time">下午</div>
+                            <div class="activity-title">传统英式下午茶</div>
+                            <div class="activity-details">在剑桥享受正宗的英式下午茶体验</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon transport">🚊</div>
+                        <div class="activity-content">
+                            <div class="activity-time">傍晚</div>
+                            <div class="activity-title">返回伦敦</div>
+                            <div class="activity-details">火车返回伦敦，继续住在同一住宿</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第4天 -->
+            <div class="day-card york">
+                <div class="day-header">
+                    <div class="day-title">第4天 - 9月17日 (星期二)</div>
+                    <div class="day-location">📍 前往约克</div>
+                </div>
+                <div class="day-content">
+                    <div class="activity">
+                        <div class="activity-icon accommodation">🏠</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">退房伦敦住宿</div>
+                            <div class="activity-details">收拾行李，告别伦敦Airbnb</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon transport">🚊</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">火车到约克</div>
+                            <div class="activity-details">从伦敦国王十字车站到约克，约2小时车程</div>
+                        </div>
+                    </div>
+                    <div class="booking-card airbnb-card">
+                        <div class="booking-title">🏠 约克住宿预订</div>
+                        <div class="booking-details">
+                            <strong>需要预订:</strong> 约克市中心住宿<br/>
+                            <strong>日期:</strong> 9月17-18日 (1晚)<br/>
+                            <strong>推荐区域:</strong> 约克老城区内<br/>
+                            <strong>特色:</strong> 靠近约克大教堂和古城墙
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon accommodation">🏠</div>
+                        <div class="activity-content">
+                            <div class="activity-time">中午</div>
+                            <div class="activity-title">入住约克住宿</div>
+                            <div class="activity-details">入住约克老城区住宿，放下行李</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">⛪</div>
+                        <div class="activity-content">
+                            <div class="activity-time">下午</div>
+                            <div class="activity-title">约克大教堂</div>
+                            <div class="activity-details">参观英国最大的哥特式教堂，欣赏彩色玻璃窗</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">🏰</div>
+                        <div class="activity-content">
+                            <div class="activity-time">下午</div>
+                            <div class="activity-title">约克古城墙漫步</div>
+                            <div class="activity-details">沿着中世纪城墙漫步，俯瞰古城美景</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon food">🍽️</div>
+                        <div class="activity-content">
+                            <div class="activity-time">傍晚</div>
+                            <div class="activity-title">约克郡晚餐</div>
+                            <div class="activity-details">品尝当地约克郡美食，感受北英格兰风味</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第5天 -->
+            <div class="day-card cotswolds">
+                <div class="day-header">
+                    <div class="day-title">第5天 - 9月18日 (星期三)</div>
+                    <div class="day-location">📍 取车前往科茨沃尔德</div>
+                </div>
+                <div class="day-content">
+                    <div class="activity">
+                        <div class="activity-icon accommodation">🏠</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">约克退房</div>
+                            <div class="activity-details">退房并前往约克火车站</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon transport">🚊</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">火车到伯明翰</div>
+                            <div class="activity-details">从约克到伯明翰，约2小时车程</div>
+                        </div>
+                    </div>
+                    <div class="booking-card">
+                        <div class="booking-title">🚗 Sixt租车预订确认</div>
+                        <div class="booking-details">
+                            <strong>车型:</strong> Volvo XC60 或同级车 (PFAR组)<br/>
+                            <strong>预订号:</strong> 9724069669<br/>
+                            <strong>取车:</strong> 伯明翰市中心 - Unit 6, Friston Avenue, B16 8HH<br/>
+                            <strong>费用:</strong> £409.51 (已付) + £500保证金<br/>
+                            <strong>包含:</strong> 全险保护, 导航系统, Android Auto/Apple CarPlay
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon transport">🚗</div>
+                        <div class="activity-content">
+                            <div class="activity-time">14:00</div>
+                            <div class="activity-title">伯明翰取车</div>
+                            <div class="activity-details">在伯明翰市中心Sixt门店取车，开始自驾之旅</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon transport">🚗</div>
+                        <div class="activity-content">
+                            <div class="activity-time">下午</div>
+                            <div class="activity-title">驾车前往科茨沃尔德</div>
+                            <div class="activity-details">从伯明翰直接驾车前往科茨沃尔德，约1.5小时车程</div>
+                        </div>
+                    </div>
+                    <div class="booking-card airbnb-card">
+                        <div class="booking-title">🏡 科茨沃尔德住宿 - Airbnb预订</div>
+                        <div class="booking-details">
+                            <strong>链接:</strong> www.airbnb.com/pv07j0Aj<br/>
+                            <strong>类型:</strong> 3卧室乡村小屋<br/>
+                            <strong>位置:</strong> 水上伯顿或斯托昂沃尔德附近<br/>
+                            <strong>特色:</strong> 宁静田园环境，便利交通<br/>
+                            <strong>入住:</strong> 9月18-20日 (2晚)
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon accommodation">🏡</div>
+                        <div class="activity-content">
+                            <div class="activity-time">傍晚</div>
+                            <div class="activity-title">入住乡村住宿</div>
+                            <div class="activity-details">享受宁静的乡村环境，准备明天的探索之旅</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第6天 -->
+            <div class="day-card cotswolds">
+                <div class="day-header">
+                    <div class="day-title">第6天 - 9月19日 (星期四)</div>
+                    <div class="day-location">📍 科茨沃尔德探索</div>
+                </div>
+                <div class="day-content">
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">🏰</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">库姆堡村</div>
+                            <div class="activity-details">风景如画的历史村庄 - 英格兰最美的村庄之一</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">🌊</div>
+                        <div class="activity-content">
+                            <div class="activity-time">中午</div>
+                            <div class="activity-title">水上伯顿</div>
+                            <div class="activity-details">美丽风景和下午茶司康饼 - "科茨沃尔德的威尼斯"</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon food">🫖</div>
+                        <div class="activity-content">
+                            <div class="activity-time">下午</div>
+                            <div class="activity-title">乡村茶室</div>
+                            <div class="activity-details">在传统英式茶室享受下午茶和司康饼</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">🌻</div>
+                        <div class="activity-content">
+                            <div class="activity-time">下午</div>
+                            <div class="activity-title">奇平卡姆登</div>
+                            <div class="activity-details">探索另一个美丽的科茨沃尔德村庄</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第7天 -->
+            <div class="day-card cotswolds">
+                <div class="day-header">
+                    <div class="day-title">第7天 - 9月20日 (星期五)</div>
+                    <div class="day-location">📍 布伦海姆宫和返回伦敦</div>
+                </div>
+                <div class="day-content">
+                    <div class="activity">
+                        <div class="activity-icon accommodation">🏡</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">科茨沃尔德退房</div>
+                            <div class="activity-details">收拾行李，告别美丽的乡村</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">🏰</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">布伦海姆宫</div>
+                            <div class="activity-details">联合国教科文组织世界遗产 - 壮丽的英式建筑和花园</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon food">🍽️</div>
+                        <div class="activity-content">
+                            <div class="activity-time">中午</div>
+                            <div class="activity-title">布伦海姆宫午餐</div>
+                            <div class="activity-details">在宫殿餐厅或附近享用午餐</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon transport">🚗</div>
+                        <div class="activity-content">
+                            <div class="activity-time">下午</div>
+                            <div class="activity-title">驾车返回伦敦</div>
+                            <div class="activity-details">前往伦敦圣潘克拉斯车站还车</div>
+                        </div>
+                    </div>
+                    <div class="booking-card">
+                        <div class="booking-title">🚗 Sixt租车还车</div>
+                        <div class="booking-details">
+                            <strong>还车地点:</strong> London St. Pancras/Kings Cross<br/>
+                            <strong>地址:</strong> Pancras Rd/Eurostar, N1C 4QP London<br/>
+                            <strong>还车时间:</strong> 9月20日下午<br/>
+                            <strong>里程限制:</strong> 300英里 (超出每英里£0.59)<br/>
+                            <strong>预订号:</strong> 9724069669
+                        </div>
+                    </div>
+                    <div class="booking-card hotel-card">
+                        <div class="booking-title">🏨 伦敦酒店预订</div>
+                        <div class="booking-details">
+                            <strong>酒店:</strong> Apex City Of London Hotel<br/>
+                            <strong>预订PIN:</strong> 0788<br/>
+                            <strong>日期:</strong> 9月20-21日<br/>
+                            <strong>位置:</strong> 伦敦市中心，靠近希思罗快线<br/>
+                            <strong>预订链接:</strong> <a href="https://secure.booking.com/app_link/myreservations.en-us.html?stid=325542&bn=6415665220&aid=332731" target="_blank">查看预订</a>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon accommodation">🏨</div>
+                        <div class="activity-content">
+                            <div class="activity-time">傍晚</div>
+                            <div class="activity-title">入住伦敦酒店</div>
+                            <div class="activity-details">入住Apex City Of London Hotel，准备明天的出发</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第8天 -->
+            <div class="day-card london">
+                <div class="day-header">
+                    <div class="day-title">第8天 - 9月21日 (星期六)</div>
+                    <div class="day-location">📍 出发回国</div>
+                </div>
+                <div class="day-content">
+                    <div class="activity">
+                        <div class="activity-icon food">☕</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">悠闲早餐</div>
+                            <div class="activity-details">在酒店享用最后的英式早餐</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon sightseeing">🛍️</div>
+                        <div class="activity-content">
+                            <div class="activity-time">上午</div>
+                            <div class="activity-title">最后购物时光</div>
+                            <div class="activity-details">可选：最后的纪念品购买或市中心漫步</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon food">🍽️</div>
+                        <div class="activity-content">
+                            <div class="activity-time">中午</div>
+                            <div class="activity-title">午餐和休息</div>
+                            <div class="activity-details">在酒店或附近享用午餐，准备出发</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon accommodation">💼</div>
+                        <div class="activity-content">
+                            <div class="activity-time">15:00</div>
+                            <div class="activity-title">酒店退房和出发准备</div>
+                            <div class="activity-details">收拾行李，准备前往机场</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon transport">🚄</div>
+                        <div class="activity-content">
+                            <div class="activity-time">15:00</div>
+                            <div class="activity-title">前往希思罗机场</div>
+                            <div class="activity-details">乘坐希思罗快线或出租车前往机场，约45分钟</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon transport">✈️</div>
+                        <div class="activity-content">
+                            <div class="activity-time">16:00-17:00</div>
+                            <div class="activity-title">机场办理登机</div>
+                            <div class="activity-details">提前3小时到达机场，办理登机和安检手续</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <div class="activity-icon transport">✈️</div>
+                        <div class="activity-content">
+                            <div class="activity-time">19:50</div>
+                            <div class="activity-title">航班起飞</div>
+                            <div class="activity-details">告别英国，带着美好回忆踏上归程</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tips">
+            <h4>💡 旅行贴士</h4>
+            <ul style="margin-left: 20px; line-height: 1.6;">
+                <li><strong>天气：</strong> 英国9月温和（15-20°C）。请准备多层衣物和轻便雨衣。</li>
+                <li><strong>交通：</strong> 考虑购买伦敦地铁和公交的牡蛎卡。</li>
+                <li><strong>预订：</strong> 建议提前预订下午茶和热门餐厅。</li>
+                <li><strong>时间：</strong> 为火车换乘和机场接驳留出额外时间。</li>
+                <li><strong>打包：</strong> 舒适的步行鞋对所有目的地都至关重要。</li>
+            </ul>
+        </div>
+
+        <div class="booking-card" style="text-align: center; margin: 20px 0;">
+            <div class="booking-title">🚗 您的租车 - Volvo XC60</div>
+            <div style="background: white; border-radius: 10px; padding: 20px; margin: 10px 0;">
+                <div style="font-size: 3em;">🚙</div>
+                <div style="color: #2c3e50; font-weight: bold; margin: 10px 0;">Volvo XC60 或同级车</div>
+                <div style="color: #7f8c8d;">高端SUV • 自动挡 • 全险保护 • GPS导航</div>
+            </div>
+        </div>
+
+        <div class="booking-card airbnb-card" style="text-align: center;">
+            <div class="booking-title">🏡 您的住宿预订</div>
+            <div style="display: flex; justify-content: space-around; flex-wrap: wrap; margin-top: 15px;">
+                <div style="background: white; border-radius: 10px; padding: 15px; margin: 5px; min-width: 150px;">
+                    <div style="font-size: 2em;">🏠</div>
+                    <div style="font-weight: bold;">伦敦</div>
+                    <div style="font-size: 0.9em;">3晚 Airbnb</div>
+                    <div style="font-size: 0.8em; color: #7f8c8d;">9月14-17日</div>
+                </div>
+                <div style="background: white; border-radius: 10px; padding: 15px; margin: 5px; min-width: 150px;">
+                    <div style="font-size: 2em;">🏰</div>
+                    <div style="font-weight: bold;">约克</div>
+                    <div style="font-size: 0.9em;">1晚 住宿</div>
+                    <div style="font-size: 0.8em; color: #7f8c8d;">9月17-18日</div>
+                </div>
+                <div style="background: white; border-radius: 10px; padding: 15px; margin: 5px; min-width: 150px;">
+                    <div style="font-size: 2em;">🏡</div>
+                    <div style="font-weight: bold;">科茨沃尔德</div>
+                    <div style="font-size: 0.9em;">2晚 乡村小屋</div>
+                    <div style="font-size: 0.8em; color: #7f8c8d;">9月18-20日</div>
+                </div>
+                <div style="background: white; border-radius: 10px; padding: 15px; margin: 5px; min-width: 150px;">
+                    <div style="font-size: 2em;">🏨</div>
+                    <div style="font-weight: bold;">伦敦酒店</div>
+                    <div style="font-size: 0.9em;">1晚 Apex Hotel</div>
+                    <div style="font-size: 0.8em; color: #7f8c8d;">9月20-21日</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize map
+        function initMap() {
+            // Create map centered on UK
+            const map = L.map('map').setView([54.5, -3], 6);
+            
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Define locations
+            const locations = [
+                {
+                    name: '伦敦',
+                    coords: [51.5074, -0.1278],
+                    info: '第1-2天, 第8天<br/>希思罗机场抵达<br/>主要景点游览'
+                },
+                {
+                    name: '剑桥',
+                    coords: [52.2053, 0.1218],
+                    info: '第3天<br/>大学城一日游<br/>历史悠久的学府'
+                },
+                {
+                    name: '约克',
+                    coords: [53.9600, -1.0873],
+                    info: '第4天<br/>中世纪古城<br/>约克大教堂'
+                },
+                {
+                    name: '伯明翰',
+                    coords: [52.4862, -1.8904],
+                    info: '第5天<br/>租车取车地点<br/>前往科茨沃尔德'
+                },
+                {
+                    name: '科茨沃尔德',
+                    coords: [51.8330, -1.8433],
+                    info: '第5-7天<br/>田园风光<br/>布伦海姆宫'
+                }
+            ];
+
+            // Add markers
+            locations.forEach((location, index) => {
+                const marker = L.marker(location.coords).addTo(map);
+                marker.bindPopup(`<b>${location.name}</b><br/>${location.info}`);
+                
+                // Custom marker colors
+                const colors = ['#e74c3c', '#3498db', '#f39c12', '#9b59b6', '#27ae60'];
+                marker.options.icon = L.divIcon({
+                    html: `<div style="background-color: ${colors[index]}; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                    iconSize: [20, 20],
+                    className: 'custom-marker'
+                });
+            });
+
+            // Add route lines
+            const routeCoords = locations.map(loc => loc.coords);
+            routeCoords.push(locations[0].coords); // Return to London
+            
+            L.polyline(routeCoords, {
+                color: '#3498db',
+                weight: 3,
+                opacity: 0.8,
+                dashArray: '10, 10'
+            }).addTo(map);
+        }
+
+        // Add smooth scrolling and interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize map
+            initMap();
+            
+            // Add click handlers for smooth interactions
+            const dayCards = document.querySelectorAll('.day-card');
+            const bookingCards = document.querySelectorAll('.booking-card');
+            
+            dayCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'scale(1.02)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 200);
+                });
+            });
+
+            // Add hover effects to booking cards
+            bookingCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px)';
+                    this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // Add current day highlighting if viewing during travel
+            const today = new Date();
+            const tripStart = new Date('2024-09-14');
+            const daysDiff = Math.floor((today - tripStart) / (1000 * 60 * 60 * 24));
+            
+            if (daysDiff >= 0 && daysDiff < 8) {
+                const currentDayCard = dayCards[daysDiff];
+                if (currentDayCard) {
+                    currentDayCard.style.boxShadow = '0 0 20px rgba(52, 152, 219, 0.5)';
+                    currentDayCard.style.borderLeft = '6px solid #3498db';
+                    
+                    // Add pulsing animation for current day
+                    currentDayCard.style.animation = 'pulse 2s infinite';
+                }
+            }
+
+            // Add pulse animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes pulse {
+                    0% { box-shadow: 0 0 20px rgba(52, 152, 219, 0.5); }
+                    50% { box-shadow: 0 0 30px rgba(52, 152, 219, 0.8); }
+                    100% { box-shadow: 0 0 20px rgba(52, 152, 219, 0.5); }
+                }
+                
+                .booking-card {
+                    transition: all 0.3s ease;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
